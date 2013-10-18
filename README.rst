@@ -1,5 +1,5 @@
 facedetect: a simple face detector for batch processing
--------------------------------------------------------
+=======================================================
 
 `facedetect` is a simple face detector for batch processing. It answers the
 basic question: "Is there a face in this image?" and gives back either an exit
@@ -76,10 +76,13 @@ faces in all the source images using `mogrify` (from ImageMagick_)::
     out="path/to/blurred/$name"
     cp "$file" "$out"
     facedetect "$file" | while read x y w h; do
-      mogrify -gravity SouthWest -region "${w}x${h}+$x+y" \
+      mogrify -gravity SouthWest -region "${w}x${h}+${x}+${y}" \
 	-scale '10%' -scale '1000%' "$out"
     done
   done
+
+Here ``mogrify`` is called for each output line of `facedetect` (which is
+sub-optimal), modifying the file in-place.
 
 
 Dependencies
