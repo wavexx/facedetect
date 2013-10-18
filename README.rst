@@ -106,7 +106,7 @@ and then install `facedetect` with::
 Development status and ideas
 ----------------------------
 
-Currently `facedetect` is a not much beyond a simple wrapper over the Haar
+Currently `facedetect` is not much beyond a simple wrapper over the Haar
 Cascade classifier of OpenCV and the ``frontalface_alt2`` profile, which
 provided the best results in terms of accuracy/detection rate for the general,
 real life photos at my disposal.
@@ -132,8 +132,8 @@ The latter simply forces a stricter minimum-neighbors in the cascade
 classifier, reducing false positives. ``--best`` however should rank the
 regions using a different criteria, such as a Contrast Transfer function
 weighted by the region size and position. This would have the effect of
-correctly choosing the focused face on a photo with considerable DOF, and or
-picking up the central subject.
+correctly choosing the focused face on a photo with considerable DOF, and/or
+picking up the central subject in a group photo.
 
 
 Authors and Copyright
@@ -142,7 +142,8 @@ Authors and Copyright
 `facedetect` can be found at http://www.thregr.org/~wavexx/hacks/facedetect/
 
 `facedetect` is distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
-Copyright(c) 2011-2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>
+Copyright(c) 2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
+
 facedetect's GIT repository is publicly accessible at::
 
   git://src.thregr.org/facedetect
