@@ -96,7 +96,7 @@ The following software is currently required for `facedetect`:
 
 On Debian/Ubuntu, you can install all the required dependencies with::
 
-  sudo python python-opencv opencv-data
+  sudo apt-get install python python-opencv opencv-data
 
 and then install `facedetect` with::
 
