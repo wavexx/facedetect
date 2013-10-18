@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+# facedetect: a simple face detector for batch processing
+# Copyright(c) 2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>
+# Distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
+from __future__ import print_function
+
+import argparse
+import cv2
+import sys
+import math
+
+
+def __main__():
+    ap = argparse.ArgumentParser(description='A simple face detector for batch processing')
+    ap.add_argument('--biggest', action="store_true",
+                    help='Extract only the biggest face')
+    ap.add_argument('--best', action="store_true",
+                    help='Extract only the best matching face')
+    ap.add_argument('-c', '--center', action="store_true",
+                    help='Print only the center coordinates')
+    ap.add_argument('-q', '--query', action="store_true",
+                    help='Query only (exit 0: face detected, 2: no detection)')
+    ap.add_argument('-o', '--output', help='Debug image output file')
+    ap.add_argument('file', help='Input image file')
+    args = ap.parse_args()
+
+    im = cv2.equalizeHist(cv2.imread(args.file, cv2.IMREAD_GRAYSCALE))
+    side = math.sqrt(im.size)
+    minlen = int(side / 20)
+    maxlen = int(side / 2)
+
+    # TODO: --best is just an alias
+    minneigh = 4 if args.best else 3
+    flags = cv2.cv.CV_HAAR_DO_CANNY_PRUNING
+    if args.biggest or args.best:
+        flags |= cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT
+
+    # frontal faces
+    cc = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml')
+    features = cc.detectMultiScale(im, 1.1, minneigh, flags, (minlen, minlen), (maxlen, maxlen))
+    if args.query:
+        return 0 if len(features) else 2
+
+    if args.output:
+        im = cv2.imread(args.file)
+        for rect in features:
+            for color, width in [((0, 0, 0), 4), ((255, 255, 255), 2)]:
+                cv2.rectangle(im, (rect[0], rect[1]), (rect[0] + rect[2], rect[1] + rect[3]), color, width)
+        cv2.imwrite(args.output, im)
+
+    if args.center:
+        for rect in features:
+            x = int(rect[0] + rect[2] / 2)
+            y = int(rect[1] + rect[3] / 2)
+            print("{} {}".format(x, y))
+    else:
+        for rect in features:
+            print("{} {} {} {}".format(*rect))
+
+
+if __name__ == '__main__':
+    exit(__main__())
