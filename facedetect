@@ -32,7 +32,7 @@ def __main__():
     # TODO: --best is just an alias
     minneigh = 4 if args.best else 3
     flags = cv2.cv.CV_HAAR_DO_CANNY_PRUNING
-    if args.biggest or args.best:
+    if args.biggest or args.best or args.query:
         flags |= cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT
 
     # frontal faces
