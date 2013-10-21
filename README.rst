@@ -91,12 +91,12 @@ Dependencies
 The following software is currently required for `facedetect`:
 
 - Python
-- Python OpenCV
-- OpenCV data files
+- Python OpenCV (``python-opencv``)
+- OpenCV data files (``opencv-data`` if available, or ``libopencv-dev``)
 
 On Debian/Ubuntu, you can install all the required dependencies with::
 
-  sudo apt-get install python python-opencv opencv-data
+  sudo apt-get install python python-opencv libopencv-dev
 
 and then install `facedetect` with::
 

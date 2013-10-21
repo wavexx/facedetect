@@ -6,13 +6,36 @@ from __future__ import print_function
 
 import argparse
 import cv2
-import sys
 import math
+import sys
+import os
 
 
 # CV compatibility stubs
 if 'IMREAD_GRAYSCALE' not in dir(cv2):
     cv2.IMREAD_GRAYSCALE = 0L
+
+
+# Profiles
+PROFILES = {
+    'HAAR_FRONTALFACE_ALT2': '/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml'
+}
+
+
+# Support functions
+def error(msg):
+    sys.stderr.write("{}: error: {}\n".format(os.path.basename(sys.argv[0]), msg))
+
+
+def fatal(msg):
+    error(msg)
+    sys.exit(1)
+
+
+def check_profiles():
+    for k, v in PROFILES.iteritems():
+        if not os.path.exists(v):
+            fatal("cannot load {} from {}".format(k, v))
 
 
 def __main__():
@@ -29,6 +52,8 @@ def __main__():
     ap.add_argument('file', help='Input image file')
     args = ap.parse_args()
 
+    check_profiles()
+
     im = cv2.equalizeHist(cv2.imread(args.file, cv2.IMREAD_GRAYSCALE))
     side = math.sqrt(im.size)
     minlen = int(side / 20)
@@ -41,7 +66,7 @@ def __main__():
         flags |= cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT
 
     # frontal faces
-    cc = cv2.CascadeClassifier('/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml')
+    cc = cv2.CascadeClassifier(PROFILES['HAAR_FRONTALFACE_ALT2'])
     features = cc.detectMultiScale(im, 1.1, minneigh, flags, (minlen, minlen), (maxlen, maxlen))
     if args.query:
         return 0 if len(features) else 2
@@ -62,6 +87,8 @@ def __main__():
         for rect in features:
             print("{} {} {} {}".format(*rect))
 
+    return 0
+
 
 if __name__ == '__main__':
-    exit(__main__())
+    sys.exit(__main__())
