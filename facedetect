@@ -10,6 +10,11 @@ import sys
 import math
 
 
+# CV compatibility stubs
+if 'IMREAD_GRAYSCALE' not in dir(cv2):
+    cv2.IMREAD_GRAYSCALE = 0L
+
+
 def __main__():
     ap = argparse.ArgumentParser(description='A simple face detector for batch processing')
     ap.add_argument('--biggest', action="store_true",
