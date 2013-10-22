@@ -22,7 +22,7 @@ By default `facedetect` outputs the rectangles of all the detected faces::
   289 139 56 56
   295 283 55 55
 
-The output values are the X Y coordinates (from the lower-left corner),
+The output values are the X Y coordinates (from the top-left corner),
 followed by width and height. For debugging, you can examine the face positions
 directly overlaid on the source image using the ``-o`` flag::
 
@@ -76,7 +76,7 @@ faces in all the source images using `mogrify` (from ImageMagick_)::
     out="path/to/blurred/$name"
     cp "$file" "$out"
     facedetect "$file" | while read x y w h; do
-      mogrify -gravity SouthWest -region "${w}x${h}+${x}+${y}" \
+      mogrify -gravity NorthWest -region "${w}x${h}+${x}+${y}" \
 	-scale '10%' -scale '1000%' "$out"
     done
   done
