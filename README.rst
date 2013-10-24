@@ -127,14 +127,6 @@ evident with "artistic" portraits shot at an angle. Pre-rotating the image
 using the information from a Hough transform might boost the detection rate in
 many cases, and should be relatively straightforward to implement.
 
-There is currently not much difference between ``--biggest`` and ``--best``.
-The latter simply forces a stricter minimum-neighbors in the cascade
-classifier, reducing false positives. ``--best`` however should rank the
-regions using a different criteria, such as a Contrast Transfer function
-weighted by the region size and position. This would have the effect of
-correctly choosing the focused face on a photo with considerable DOF, and/or
-picking up the central subject in a group photo.
-
 
 Authors and Copyright
 ---------------------
