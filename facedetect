@@ -54,7 +54,11 @@ def __main__():
 
     check_profiles()
 
-    im = cv2.equalizeHist(cv2.imread(args.file, cv2.IMREAD_GRAYSCALE))
+    im = cv2.imread(args.file, cv2.IMREAD_GRAYSCALE)
+    if im is None:
+        fatal("cannot load input image {}".format(args.file))
+
+    im = cv2.equalizeHist(im)
     side = math.sqrt(im.size)
     minlen = int(side / 20)
     maxlen = int(side / 2)
