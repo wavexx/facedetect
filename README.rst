@@ -48,6 +48,16 @@ The ``--biggest`` flag only outputs the biggest face in the image, while
 ``--best`` will attempt to select the face in focus and/or in the center of the
 frame.
 
+.. figure:: doc/biggest-best.jpg
+  :align: center
+
+  Comparison between ``--best`` (top) and ``--biggest`` (bottom). The actual
+  chosen face is highlighted in yellow.
+
+Unless DOF or motion blur is used effectively by the photographer to separate
+the subject, ``--biggest`` would in most cases select the same face as
+``--best``, while being significantly faster to compute.
+
 
 Examples
 --------
