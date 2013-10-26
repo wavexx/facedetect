@@ -49,7 +49,7 @@ def rank(im, rects):
         rx = (rect[0] + b, rect[0] + rect[2] - b)
         ry = (rect[1] + b, rect[1] + rect[3] - b)
         roi = im[ry[0]:ry[1], rx[0]:rx[1]]
-        s = float(rect[2] * rect[3])
+        s = (rect[2] + rect[3]) / 2.
 
         scale = 100. / max(rect[2], rect[3])
         dsize = (int(rect[2] * scale), int(rect[3] * scale))
@@ -70,7 +70,7 @@ def rank(im, rects):
         s = scores[i]
         sN = s['sN'] = s['s'] / sMax
         eN = s['eN'] = s['e'] / eMax
-        f = s['f'] = eN * 0.7 + (1 - s['d']) * 0.05 + sN * 0.25
+        f = s['f'] = eN * 0.7 + (1 - s['d']) * 0.1 + sN * 0.2
 
     ranks = range(len(scores))
     ranks = sorted(ranks, reverse=True, key=lambda x: scores[x]['f'])
