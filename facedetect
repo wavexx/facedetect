@@ -45,7 +45,10 @@ def rank(im, rects):
 
     for i in range(len(rects)):
         rect = rects[i]
-        roi = im[rect[1]:(rect[1]+rect[3]), rect[0]:(rect[0]+rect[2])]
+        b = min(rect[2], rect[3]) / 10.
+        rx = (rect[0] + b, rect[0] + rect[2] - b)
+        ry = (rect[1] + b, rect[1] + rect[3] - b)
+        roi = im[ry[0]:ry[1], rx[0]:rx[1]]
         s = float(rect[2] * rect[3])
 
         scale = 100. / max(rect[2], rect[3])
