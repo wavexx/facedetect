@@ -143,13 +143,14 @@ Authors and Copyright
 
 `facedetect` can be found at http://www.thregr.org/~wavexx/hacks/facedetect/
 
-`facedetect` is distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
-Copyright(c) 2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
+| `facedetect` is distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
+| Copyright(c) 2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
 
 facedetect's GIT repository is publicly accessible at::
 
   git://src.thregr.org/facedetect
 
+or at `GitHub <https://github.com/wavexx/facedetect>`_.
 
 .. _ImageMagick: http://www.imagemagick.org
 .. _fgallery: http://www.thregr.org/~wavexx/software/fgallery/
