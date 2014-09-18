@@ -141,7 +141,7 @@ many cases, and should be relatively straightforward to implement.
 Authors and Copyright
 ---------------------
 
-`facedetect` can be found at http://www.thregr.org/~wavexx/hacks/facedetect/
+`facedetect` can be found at http://www.thregr.org/~wavexx/software/facedetect/
 
 | `facedetect` is distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
 | Copyright(c) 2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
