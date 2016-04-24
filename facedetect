@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # facedetect: a simple face detector for batch processing
-# Copyright(c) 2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>
-# Distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
-from __future__ import print_function
+# Copyright(c) 2013-2016 by wave++ "Yuri D'Elia" <wavexx@thregr.org>
+# Distributed under GPLv2+ (see COPYING) WITHOUT ANY WARRANTY.
+from __future__ import print_function, division
 
 import argparse
 import numpy as np
@@ -14,7 +14,7 @@ import os
 
 # CV compatibility stubs
 if 'IMREAD_GRAYSCALE' not in dir(cv2):
-    cv2.IMREAD_GRAYSCALE = 0L
+    cv2.IMREAD_GRAYSCALE = 0
 
 
 # Profiles
@@ -45,13 +45,13 @@ def rank(im, rects):
 
     for i in range(len(rects)):
         rect = rects[i]
-        b = min(rect[2], rect[3]) / 10.
+        b = min(rect[2], rect[3]) // 10
         rx = (rect[0] + b, rect[0] + rect[2] - b)
         ry = (rect[1] + b, rect[1] + rect[3] - b)
         roi = im[ry[0]:ry[1], rx[0]:rx[1]]
-        s = (rect[2] + rect[3]) / 2.
+        s = (rect[2] + rect[3]) / 2
 
-        scale = 100. / max(rect[2], rect[3])
+        scale = 100 / max(rect[2], rect[3])
         dsize = (int(rect[2] * scale), int(rect[3] * scale))
         roi_n = cv2.resize(roi, dsize, interpolation=cv2.INTER_CUBIC)
         roi_l = cv2.Laplacian(roi_n, cv2.CV_8U)
