@@ -18,8 +18,10 @@ if 'IMREAD_GRAYSCALE' not in dir(cv2):
 
 
 # Profiles
+DATA_DIR = '/usr/share/opencv/'
+
 PROFILES = {
-    'HAAR_FRONTALFACE_ALT2': '/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml'
+    'HAAR_FRONTALFACE_ALT2': 'haarcascades/haarcascade_frontalface_alt2.xml',
 }
 
 
@@ -33,8 +35,9 @@ def fatal(msg):
     sys.exit(1)
 
 
-def check_profiles():
+def check_profiles(data_dir):
     for k, v in PROFILES.iteritems():
+        PROFILES[k] = v = os.path.join(data_dir, v)
         if not os.path.exists(v):
             fatal("cannot load {} from {}".format(k, v))
 
@@ -88,6 +91,8 @@ def __main__():
                     help='Extract only the best matching face')
     ap.add_argument('-c', '--center', action="store_true",
                     help='Print only the center coordinates')
+    ap.add_argument('--data-dir', metavar='DIRECTORY', default=DATA_DIR,
+                    help='OpenCV data files directory')
     ap.add_argument('-q', '--query', action="store_true",
                     help='Query only (exit 0: face detected, 2: no detection)')
     ap.add_argument('-o', '--output', help='Image output file')
@@ -96,7 +101,7 @@ def __main__():
     ap.add_argument('file', help='Input image file')
     args = ap.parse_args()
 
-    check_profiles()
+    check_profiles(args.data_dir)
 
     im = cv2.imread(args.file, cv2.IMREAD_GRAYSCALE)
     if im is None:
