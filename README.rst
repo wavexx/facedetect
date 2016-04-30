@@ -9,12 +9,12 @@ The aim is to provide a basic command-line interface that's consistent and easy
 to use with software such as ImageMagick_, while progressively improving the
 detection algorithm over time.
 
-`facedetect` is currently used in fgallery_ to improve the thumbnail cutting
-region, so that faces are always centered.
+`facedetect` is used in software such as fgallery_ to improve the thumbnail
+cutting region, so that faces are always centered.
 
 
-Usage
------
+Basic Usage
+-----------
 
 By default `facedetect` outputs the rectangles of all the detected faces::
 
@@ -51,7 +51,7 @@ frame.
 .. figure:: doc/biggest-best.jpg
   :align: center
 
-  Comparison between ``--best`` (top) and ``--biggest`` (bottom). The actual
+  Comparison between ``--best`` (top) and ``--biggest`` (bottom). The
   chosen face is highlighted in yellow.
 
 Unless DOF or motion blur is used effectively by the photographer to separate
@@ -93,6 +93,24 @@ faces in all the source images using `mogrify` (from ImageMagick_)::
 
 Here ``mogrify`` is called for each output line of `facedetect` (which is
 sub-optimal), modifying the file in-place.
+
+
+Searching for a face
+--------------------
+
+`facedetect` has some naïve support to search for a specific face as supplied
+with the ``-s`` file argument. The file provided must be an image containing
+preferably a *single* face. `facedetect` will then compare all faces against
+it, and output only the matches which are above the requested similarity
+threshold (30% by default).
+
+When face search is used with ``-q`` (query), and exit status of 0 is only
+emitted if there is at least one face matching the requested template.
+
+The similarity threshold can be controlled with ``--search-threshold``, which
+is a value between -100 and 100, with greater values resulting in greater
+similarity. The current matching algorithm is based on simple MSSIM which is
+far from perfect (see `Development status and ideas`_).
 
 
 Dependencies
@@ -137,11 +155,23 @@ evident with "artistic" portraits shot at an angle. Pre-rotating the image
 using the information from a Hough transform might boost the detection rate in
 many cases, and should be relatively straightforward to implement.
 
+Face matching has the interface that user's expect ("find me *this* face"), but
+doesn't work as it should. Faces are currently compared using pairwise MSSIM,
+which is a far cry from proper face segmentation. MSSIM will only find faces
+that have comparable orientation, expression and lighting conditions. HAAR
+features do not provide the positioning accuracy required to perform even the
+simplest face segmentation operations, such as inter-eye distance.
+Interestingly, computing a score using 1:1 SIFT feature matches performed even
+worse than plain MSSIM (not enough granularity in most scenarios). Building a
+GUI on top of facedetect to train SVM models (which can then be fed back to
+``-s``) seems a better way to go given the far greater accuracy, but somehow
+deviates from the original intention of unsupervised search.
+
 
 Authors and Copyright
 ---------------------
 
-`facedetect` can be found at http://www.thregr.org/~wavexx/software/facedetect/
+`facedetect` can be found at https://www.thregr.org/~wavexx/software/facedetect/
 
 | `facedetect` is distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
 | Copyright(c) 2013 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
@@ -152,5 +182,6 @@ facedetect's GIT repository is publicly accessible at::
 
 or at https://github.com/wavexx/facedetect
 
+
 .. _ImageMagick: http://www.imagemagick.org
-.. _fgallery: http://www.thregr.org/~wavexx/software/fgallery/
+.. _fgallery: https://www.thregr.org/~wavexx/software/fgallery/
