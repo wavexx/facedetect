@@ -19,6 +19,7 @@ if 'IMREAD_GRAYSCALE' not in dir(cv2):
 
 # Profiles
 DATA_DIR = '/usr/share/opencv/'
+CASCADES = {}
 
 PROFILES = {
     'HAAR_FRONTALFACE_ALT2': 'haarcascades/haarcascade_frontalface_alt2.xml',
@@ -35,11 +36,20 @@ def fatal(msg):
     sys.exit(1)
 
 
-def check_profiles(data_dir):
+def load_cascades(data_dir):
     for k, v in PROFILES.iteritems():
-        PROFILES[k] = v = os.path.join(data_dir, v)
-        if not os.path.exists(v):
+        v = os.path.join(data_dir, v)
+        try:
+            if not os.path.exists(v):
+                raise cv2.error('no such file')
+            CASCADES[k] = cv2.CascadeClassifier(v)
+        except cv2.error:
             fatal("cannot load {} from {}".format(k, v))
+
+
+def crop_rect(im, rect, shave=0):
+    return im[rect[1]+shave:rect[1]+rect[3]-shave,
+              rect[0]+shave:rect[0]+rect[2]-shave]
 
 
 def rank(im, rects):
@@ -49,9 +59,7 @@ def rank(im, rects):
     for i in range(len(rects)):
         rect = rects[i]
         b = min(rect[2], rect[3]) // 10
-        rx = (rect[0] + b, rect[0] + rect[2] - b)
-        ry = (rect[1] + b, rect[1] + rect[3] - b)
-        roi = im[ry[0]:ry[1], rx[0]:rx[1]]
+        roi = crop_rect(im, rect, b)
         s = (rect[2] + rect[3]) / 2
 
         scale = 100 / max(rect[2], rect[3])
@@ -83,6 +91,31 @@ def rank(im, rects):
     return scores, ranks[0]
 
 
+def face_detect(im, biggest=False):
+    side = math.sqrt(im.size)
+    minlen = int(side / 20)
+    maxlen = int(side / 2)
+    flags = cv2.cv.CV_HAAR_DO_CANNY_PRUNING
+
+    # optimize queries when possible
+    if biggest:
+        flags |= cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT
+
+    # frontal faces
+    cc = CASCADES['HAAR_FRONTALFACE_ALT2']
+    features = cc.detectMultiScale(im, 1.1, 4, flags, (minlen, minlen), (maxlen, maxlen))
+    return features
+
+
+def face_detect_file(path, biggest=False):
+    im = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    if im is None:
+        fatal("cannot load input image {}".format(path))
+    im = cv2.equalizeHist(im)
+    features = face_detect(im, biggest)
+    return im, features
+
+
 def __main__():
     ap = argparse.ArgumentParser(description='A simple face detector for batch processing')
     ap.add_argument('--biggest', action="store_true",
@@ -101,25 +134,13 @@ def __main__():
     ap.add_argument('file', help='Input image file')
     args = ap.parse_args()
 
-    check_profiles(args.data_dir)
+    load_cascades(args.data_dir)
 
-    im = cv2.imread(args.file, cv2.IMREAD_GRAYSCALE)
-    if im is None:
-        fatal("cannot load input image {}".format(args.file))
+    # detect faces in input image
+    im, features = face_detect_file(args.file, args.query or args.biggest)
 
-    im = cv2.equalizeHist(im)
-    side = math.sqrt(im.size)
-    minlen = int(side / 20)
-    maxlen = int(side / 2)
-    flags = cv2.cv.CV_HAAR_DO_CANNY_PRUNING
 
-    # optimize queries when possible
-    if args.biggest or args.query:
-        flags |= cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT
-
-    # frontal faces
-    cc = cv2.CascadeClassifier(PROFILES['HAAR_FRONTALFACE_ALT2'])
-    features = cc.detectMultiScale(im, 1.1, 4, flags, (minlen, minlen), (maxlen, maxlen))
+    # exit early if possible
     if args.query:
         return 0 if len(features) else 2
 
