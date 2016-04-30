@@ -109,6 +109,30 @@ def rank(im, rects):
     return scores, ranks[0]
 
 
+def mssim_norm(X, Y, K1=0.01, K2=0.03, win_size=11, sigma=1.5):
+    C1 = K1 ** 2
+    C2 = K2 ** 2
+    cov_norm = win_size ** 2
+
+    ux = cv2.GaussianBlur(X, (win_size, win_size), sigma)
+    uy = cv2.GaussianBlur(Y, (win_size, win_size), sigma)
+    uxx = cv2.GaussianBlur(X * X, (win_size, win_size), sigma)
+    uyy = cv2.GaussianBlur(Y * Y, (win_size, win_size), sigma)
+    uxy = cv2.GaussianBlur(X * Y, (win_size, win_size), sigma)
+    vx = cov_norm * (uxx - ux * ux)
+    vy = cov_norm * (uyy - uy * uy)
+    vxy = cov_norm * (uxy - ux * uy)
+
+    A1 = 2 * ux * uy + C1
+    A2 = 2 * vxy + C2
+    B1 = ux ** 2 + uy ** 2 + C1
+    B2 = vx + vy + C2
+    D = B1 * B2
+    S = (A1 * A2) / D
+
+    return np.mean(shave_margin(S, (win_size - 1) // 2))
+
+
 def face_detect(im, biggest=False):
     side = math.sqrt(im.size)
     minlen = int(side / 20)
@@ -134,6 +158,14 @@ def face_detect_file(path, biggest=False):
     return im, features
 
 
+def pairwise_similarity(im, features, template, **mssim_args):
+    template = np.float32(template) / 255
+    for rect in features:
+        roi = norm_rect(im, rect)
+        roi = np.float32(roi) / 255
+        yield mssim_norm(roi, template, **mssim_args)
+
+
 def __main__():
     ap = argparse.ArgumentParser(description='A simple face detector for batch processing')
     ap.add_argument('--biggest', action="store_true",
@@ -146,6 +178,10 @@ def __main__():
                     help='OpenCV data files directory')
     ap.add_argument('-q', '--query', action="store_true",
                     help='Query only (exit 0: face detected, 2: no detection)')
+    ap.add_argument('-s', '--search', metavar='FILE',
+                    help='Search for faces similar to the one supplied in FILE')
+    ap.add_argument('--search-threshold', metavar='PERCENT', type=int, default=30,
+                    help='Face similarity threshold (default: 30%%)')
     ap.add_argument('-o', '--output', help='Image output file')
     ap.add_argument('-d', '--debug', action="store_true",
                     help='Add debugging metrics in the image output file')
@@ -157,6 +193,21 @@ def __main__():
     # detect faces in input image
     im, features = face_detect_file(args.file, args.query or args.biggest)
 
+    # match against the requested face
+    sim_scores = None
+    if args.search:
+        s_im, s_features = face_detect_file(args.search, True)
+        if len(s_features) == 0:
+            fatal("cannot detect face in template")
+        sim_scores = []
+        sim_features = []
+        sim_threshold = args.search_threshold / 100
+        sim_template = norm_rect(s_im, s_features[0])
+        for i, score in enumerate(pairwise_similarity(im, features, sim_template)):
+            if score >= sim_threshold:
+                sim_scores.append(score)
+                sim_features.append(features[i])
+        features = sim_features
 
     # exit early if possible
     if args.query:
@@ -165,8 +216,11 @@ def __main__():
     # compute scores
     scores = []
     best = None
-    if len(features) and (args.debug or args.best or args.biggest):
+    if len(features) and (args.debug or args.best or args.biggest or sim_scores):
         scores, best = rank(im, features)
+        if sim_scores:
+            for i in range(len(features)):
+                scores[i]['MSSIM'] = sim_scores[i]
 
     # debug features
     if args.output:
