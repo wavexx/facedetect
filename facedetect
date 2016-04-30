@@ -26,6 +26,11 @@ PROFILES = {
 }
 
 
+# Face normalization
+NORM_SIZE = 100
+NORM_MARGIN = 10
+
+
 # Support functions
 def error(msg):
     sys.stderr.write("{}: error: {}\n".format(os.path.basename(sys.argv[0]), msg))
@@ -52,26 +57,39 @@ def crop_rect(im, rect, shave=0):
               rect[0]+shave:rect[0]+rect[2]-shave]
 
 
+def shave_margin(im, margin):
+    return im[margin:-margin, margin:-margin]
+
+
+def norm_rect(im, rect, equalize=True, same_aspect=False):
+    roi = crop_rect(im, rect)
+    if equalize:
+        roi = cv2.equalizeHist(roi)
+    side = NORM_SIZE + NORM_MARGIN
+    if same_aspect:
+        scale = side / max(rect[2], rect[3])
+        dsize = (int(rect[2] * scale), int(rect[3] * scale))
+    else:
+        dsize = (side, side)
+    roi = cv2.resize(roi, dsize, interpolation=cv2.INTER_CUBIC)
+    return shave_margin(roi, NORM_MARGIN)
+
+
 def rank(im, rects):
     scores = []
     best = None
 
     for i in range(len(rects)):
         rect = rects[i]
-        b = min(rect[2], rect[3]) // 10
-        roi = crop_rect(im, rect, b)
-        s = (rect[2] + rect[3]) / 2
-
-        scale = 100 / max(rect[2], rect[3])
-        dsize = (int(rect[2] * scale), int(rect[3] * scale))
-        roi_n = cv2.resize(roi, dsize, interpolation=cv2.INTER_CUBIC)
+        roi_n = norm_rect(im, rect, equalize=False, same_aspect=True)
         roi_l = cv2.Laplacian(roi_n, cv2.CV_8U)
-        e = np.sum(roi_l) / (dsize[0] * dsize[1])
+        e = np.sum(roi_l) / (roi_n.shape[0] * roi_n.shape[1])
 
         dx = im.shape[1] / 2 - rect[0] + rect[2] / 2
         dy = im.shape[0] / 2 - rect[1] + rect[3] / 2
         d = math.sqrt(dx ** 2 + dy ** 2) / (max(im.shape) / 2)
 
+        s = (rect[2] + rect[3]) / 2
         scores.append({'s': s, 'e': e, 'd': d})
 
     sMax = max([x['s'] for x in scores])
