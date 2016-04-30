@@ -65,12 +65,12 @@ Examples
 Sorting images with and without faces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The following example sorts pictures into two different "landscape"
-and "portrait" directories using the exit code::
+and "people" directories using the exit code::
 
   for file in path/to/pictures/*.jpg; do
     name=$(basename "$file")
     if facedetect -q "$file"; then
-      mv "$file" "path/to/portrait/$name"
+      mv "$file" "path/to/people/$name"
     else
       mv "$file" "path/to/landscape/$name"
     fi
