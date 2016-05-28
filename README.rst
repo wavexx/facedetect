@@ -94,6 +94,20 @@ faces in all the source images using `mogrify` (from ImageMagick_)::
 Here ``mogrify`` is called for each output line of `facedetect` (which is
 sub-optimal), modifying the file in-place.
 
+Extracting all faces to separate images
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The following example uses ``convert`` from ImageMagick_ to extract each
+face in each source image ``img.jpg`` to a separated image ``img_N.jpg``::
+
+  for file in path/to/pictures/*.jpg; do
+    name=$(basename "$file")
+    i=0
+    facedetect "$file" | while read x y w h; do
+      convert "$file" -crop ${w}x${h}+${x}+${y} "path/to/faces/${name%.*}_${i}.${name##*.}"
+      i=$(($i+1))
+    done
+  done
+
 
 Searching for a face
 --------------------
