@@ -14,7 +14,23 @@ import os
 
 # CV compatibility stubs
 if 'IMREAD_GRAYSCALE' not in dir(cv2):
+    # <2.4
     cv2.IMREAD_GRAYSCALE = 0
+if 'cv' in dir(cv2):
+    # <3.0
+    cv2.CASCADE_DO_CANNY_PRUNING = cv2.cv.CV_HAAR_DO_CANNY_PRUNING
+    cv2.CASCADE_FIND_BIGGEST_OBJECT = cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT
+    cv2.FONT_HERSHEY_SIMPLEX = cv2.cv.InitFont(cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5, 0, 1, cv2.cv.CV_AA)
+    cv2.LINE_AA = cv2.cv.CV_AA
+
+    def getTextSize(buf, font, scale, thickness):
+        return cv2.cv.GetTextSize(buf, font)
+
+    def putText(im, line, pos, font, scale, color, thickness, lineType):
+        return cv2.cv.PutText(cv2.cv.fromarray(im), line, pos, font, color)
+
+    cv2.getTextSize = getTextSize
+    cv2.putText = putText
 
 
 # Profiles
@@ -137,11 +153,11 @@ def face_detect(im, biggest=False):
     side = math.sqrt(im.size)
     minlen = int(side / 20)
     maxlen = int(side / 2)
-    flags = cv2.cv.CV_HAAR_DO_CANNY_PRUNING
+    flags = cv2.CASCADE_DO_CANNY_PRUNING
 
     # optimize queries when possible
     if biggest:
-        flags |= cv2.cv.CV_HAAR_FIND_BIGGEST_OBJECT
+        flags |= cv2.CASCADE_FIND_BIGGEST_OBJECT
 
     # frontal faces
     cc = CASCADES['HAAR_FRONTALFACE_ALT2']
@@ -225,8 +241,8 @@ def __main__():
     # debug features
     if args.output:
         im = cv2.imread(args.file)
-        font = cv2.cv.InitFont(cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5, 0, 1, cv2.cv.CV_AA)
-        fontHeight = cv2.cv.GetTextSize("", font)[0][1] + 5
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fontHeight = cv2.getTextSize("", font, 0.5, 1)[0][1] + 5
 
         for i in range(len(features)):
             if best is not None and i != best and not args.debug:
@@ -246,7 +262,7 @@ def __main__():
                     lines.append("{}: {}".format(k, v))
                 h = rect[1] + rect[3] + fontHeight
                 for line in lines:
-                    cv2.cv.PutText(cv2.cv.fromarray(im), line, (rect[0], h), font, fg)
+                    cv2.putText(im, line, (rect[0], h), font, 0.5, fg, 1, cv2.LINE_AA)
                     h += fontHeight
 
         cv2.imwrite(args.output, im)
