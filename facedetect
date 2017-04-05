@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # facedetect: a simple face detector for batch processing
 # Copyright(c) 2013-2016 by wave++ "Yuri D'Elia" <wavexx@thregr.org>
 # Distributed under GPLv2+ (see COPYING) WITHOUT ANY WARRANTY.
-from __future__ import print_function, division
+from __future__ import print_function, division, generators, unicode_literals
 
 import argparse
 import numpy as np
@@ -58,7 +58,7 @@ def fatal(msg):
 
 
 def load_cascades(data_dir):
-    for k, v in PROFILES.iteritems():
+    for k, v in PROFILES.items():
         v = os.path.join(data_dir, v)
         try:
             if not os.path.exists(v):
@@ -258,7 +258,7 @@ def __main__():
 
             if args.debug:
                 lines = []
-                for k, v in scores[i].iteritems():
+                for k, v in scores[i].items():
                     lines.append("{}: {}".format(k, v))
                 h = rect[1] + rect[3] + fontHeight
                 for line in lines:
