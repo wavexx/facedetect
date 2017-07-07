@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # facedetect: a simple face detector for batch processing
-# Copyright(c) 2013-2016 by wave++ "Yuri D'Elia" <wavexx@thregr.org>
+# Copyright(c) 2013-2017 by wave++ "Yuri D'Elia" <wavexx@thregr.org>
 # Distributed under GPLv2+ (see COPYING) WITHOUT ANY WARRANTY.
 from __future__ import print_function, division, generators, unicode_literals
 
